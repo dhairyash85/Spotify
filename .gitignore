@@ -22,3 +22,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+recommendation_results.json
+recommendation_processed_results.json
+spotify_results.json
+youtube_results.json
+processed_results.json
