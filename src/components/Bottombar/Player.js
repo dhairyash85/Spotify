@@ -1,21 +1,21 @@
 import { Icon } from "../../Icons";
-import { useContext ,useState,useEffect} from "react";
+import { useContext, useState, useEffect } from "react";
 import songContext from "../../context/SongContext";
-import {useVoiceModulation} from "@specular-aura/voice-modulation";
+import { useVoiceModulation } from "@specular-aura/voice-modulation";
 import CustomRange from "../../CustomRange";
 
 function Player({ audioElem }) {
-const context = useContext(songContext);
+  const context = useContext(songContext);
 
-const {songs, isplaying, setIsplaying, currentSong, setCurrentSong}=context;
-const [progress, setProgress] = useState(0);
-
-
-const currentTime = audioElem.current ? audioElem.current.currentTime : 0;
-const duration = audioElem.current ? audioElem.current.duration : 0;
+  const { songs, isplaying, setIsplaying, currentSong, setCurrentSong } = context;
+  const [progress, setProgress] = useState(0);
 
 
-const updateProgress = () => {
+  const currentTime = audioElem.current ? audioElem.current.currentTime : 0;
+  const duration = audioElem.current ? audioElem.current.duration : 0;
+
+
+  const updateProgress = () => {
     const newProgress = (audioElem.current.currentTime / duration) * 100;
     setProgress(newProgress);
     // setCt(audioElem.current.currentTime);
@@ -33,47 +33,46 @@ const updateProgress = () => {
     };
   }, [audioElem, duration]);
 
-// Voice modulation Function
 
-const changeVoice=useVoiceModulation(
+  const changeVoice = useVoiceModulation(
     currentSong,
     setCurrentSong,
-    "megaphone"
-);
+    "troll"
+  );
 
-const PlayPause=()=>{
-  if(currentSong){
-    setIsplaying(!isplaying);
-  }else{
-    setIsplaying(false);
+  const PlayPause = () => {
+    if (currentSong) {
+      setIsplaying(!isplaying);
+    } else {
+      setIsplaying(false);
+    }
   }
-}
 
-const skipBack=()=>{
-  const index = songs.findIndex((x)=>x.title === currentSong.title);
-  if(index === 0){
-    setCurrentSong(songs[songs.length -1])
-  }else{
-    setCurrentSong(songs[index -1])
+  const skipBack = () => {
+    const index = songs.findIndex((x) => x.title === currentSong.title);
+    if (index === 0) {
+      setCurrentSong(songs[songs.length - 1])
+    } else {
+      setCurrentSong(songs[index - 1])
+    }
   }
-}
 
-const skipToNext=()=>{
-  const index = songs.findIndex((x)=>x.title === currentSong.title);
-  if(index === songs.length -1){
-    setCurrentSong(songs[0])
-  }else{
-    setCurrentSong(songs[index+1])
+  const skipToNext = () => {
+    const index = songs.findIndex((x) => x.title === currentSong.title);
+    if (index === songs.length - 1) {
+      setCurrentSong(songs[0])
+    } else {
+      setCurrentSong(songs[index + 1])
+    }
   }
-}
 
-function formatTime(timeInSeconds) {
-  const minutes = Math.floor(timeInSeconds / 60);
-  const seconds = Math.floor(timeInSeconds % 60);
-  const formattedMinutes = String(minutes).padStart(2, "0");
-  const formattedSeconds = String(seconds).padStart(2, "0");
-  return `${formattedMinutes}:${formattedSeconds}`;
-}
+  function formatTime(timeInSeconds) {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    const formattedMinutes = String(minutes).padStart(2, "0");
+    const formattedSeconds = String(seconds).padStart(2, "0");
+    return `${formattedMinutes}:${formattedSeconds}`;
+  }
 
 
   return (
@@ -117,7 +116,7 @@ function formatTime(timeInSeconds) {
             </button>
 
             <button onClick={PlayPause} className="w-8 h-8 bg-white flex items-center justify-center rounded-full text-black hover:scale-[1.06]">
-{isplaying?(<Icon size={16} name="pause"></Icon>):(<Icon size={16} name="play"></Icon>)}              
+              {isplaying ? (<Icon size={16} name="pause"></Icon>) : (<Icon size={16} name="play"></Icon>)}
             </button>
 
             <button onClick={skipToNext} className="w-8 h-8 flex items-center justify-center text-white text-opacity-70 hover:text-opacity-100">
@@ -130,36 +129,36 @@ function formatTime(timeInSeconds) {
           </div>
           {/* day 3 */}
           <div className="w-full flex items-center mt-1.5 gap-x-2">
-        <div className="text-[0.688rem] text-white text-opacity-70">
-        {formatTime(currentTime)}
-        </div>
+            <div className="text-[0.688rem] text-white text-opacity-70">
+              {formatTime(currentTime)}
+            </div>
 
 
-        <CustomRange
-           value={progress}
-            onChange={(value) => {
-              const newTime = (value / 100) * audioElem.current.duration;
-            //   setCt(newTime);
-              audioElem.current.currentTime = newTime;
-            }}
-            onClick={() => {
-                if(!isplaying && audioElem.current)
-              audioElem.current.pause();
-            }}
-            onDragStart={() => {
-                if(!isplaying && audioElem.current)
-              audioElem.current.pause();
-            }}
-            onDragEnd={() => {
-              if (isplaying  && audioElem.current) {
-                audioElem.current.play();
-              }
-            }}
-          />
-        <div className="text-[0.688rem] text-white text-opacity-70">
-        {formatTime(duration)}
-        </div>
-      </div>
+            <CustomRange
+              value={progress}
+              onChange={(value) => {
+                const newTime = (value / 100) * audioElem.current.duration;
+                //   setCt(newTime);
+                audioElem.current.currentTime = newTime;
+              }}
+              onClick={() => {
+                if (!isplaying && audioElem.current)
+                  audioElem.current.pause();
+              }}
+              onDragStart={() => {
+                if (!isplaying && audioElem.current)
+                  audioElem.current.pause();
+              }}
+              onDragEnd={() => {
+                if (isplaying && audioElem.current) {
+                  audioElem.current.play();
+                }
+              }}
+            />
+            <div className="text-[0.688rem] text-white text-opacity-70">
+              {formatTime(duration)}
+            </div>
+          </div>
 
         </div>
 
@@ -167,7 +166,7 @@ function formatTime(timeInSeconds) {
         <div className="min-w-[11.25rem] w-[30%] flex items-center justify-end">
           <div className="flex items-center">
             <button onClick={changeVoice}
-            className="w-8 h-8 flex items-center justify-center text-white text-opacity-70 hover:text-opacity-100">
+              className="w-8 h-8 flex items-center justify-center text-white text-opacity-70 hover:text-opacity-100">
               <Icon size={16} name="plus"></Icon>
             </button>
 

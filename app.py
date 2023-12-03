@@ -10,33 +10,27 @@ from yt_dlp import YoutubeDL
 from ytmusicapi import YTMusic
 from contextlib import redirect_stdout
 
-# env
+from recommendations.recommender import getRecommendations
+
 dotenv.load_dotenv()
 
-# calling flask
 app = Flask(__name__,
             static_url_path='/',
             static_folder='build/')
 
-# Spotify Api
 
 spotify_client_id = os.getenv("SPOTIFY_CLIENT_ID")
 spotify_client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
     client_id=spotify_client_id, client_secret=spotify_client_secret))
 
-# Youtube API
 ytmusic = YTMusic()
 
-# audio features
 
 
 def get_audio_features(trackId):
     results = sp.audio_features(trackId)
     return results[0]
-
-# METADATA USING TRACK ID
-
 
 def get_track_metadata(trackId_list):
     results = sp.tracks(trackId_list)
@@ -66,12 +60,8 @@ def get_track_metadata(trackId_list):
 
     return data
 
-# search songs
-
-
 def search_songs(song_name):
     results = sp.search(q=song_name, type='track', limit=10)
-    # print(results)
     with open("spotify_results.json", "w") as file:
         json.dump(results, file, indent=2)
 
@@ -99,9 +89,7 @@ def search_songs(song_name):
         json.dump(data, file, indent=2)
 
     return data
-"""
-Get the youtube id of the song from the song title and artist name
-"""
+
 def get_youtube_link(track_name, artist_name):
 
     youtube_query = f"{track_name} {artist_name}"
@@ -140,7 +128,7 @@ def stream():
         "outtmpl": "-",
         'logtostderr': True,
         'format': 'mp3/bestaudio/best',
-        'postprocessors': [{  # Extract audio using ffmpeg
+        'postprocessors': [{  
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
         }]
@@ -151,8 +139,24 @@ def stream():
         foo.download([youtube_url])
 
     print(buffer.getbuffer().nbytes)
-    buffer.seek(0)  # Move the buffer position to the beginning
+    buffer.seek(0)  
     return send_file(buffer, mimetype='audio/mpeg')
+
+@app.route('/api/recommend/<trackId>')
+def recommend(trackId):
+    audio_features = get_audio_features(trackId)
+    keys = ['acousticness', 'danceability',
+       'duration_ms', 'energy', 'instrumentalness', 'key', 'liveness',
+       'loudness', 'mode', 'speechiness', 'tempo', 'time_signature', 'valence']
+    feature_vector = [audio_features.get(key) for key in keys]
+    recommendations = getRecommendations(feature_vector)
+
+    with open("recommendation_results.json", "w") as file:
+        json.dump(recommendations, file, indent=2)
+
+    song_data = get_track_metadata([track.get("id") for track in recommendations])
+    return jsonify(song_data)
+
 
 if __name__=='__main__':
     app.run(debug=True)
